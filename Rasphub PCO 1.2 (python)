@@ -1,0 +1,100 @@
+import time
+import board
+import digitalio
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+# Skapa en USB HID-tangentbord.
+keyboard = Keyboard(usb_hid.devices)
+
+# Skapa ett tangentbordslayout för att skicka strängar.
+keyboard_layout = KeyboardLayoutUS(keyboard)
+
+# Konfigurera knapparna på Button SHIM
+buttons = [
+    digitalio.DigitalInOut(board.BUTTON_A),
+    digitalio.DigitalInOut(board.BUTTON_B),
+    digitalio.DigitalInOut(board.BUTTON_C),
+    digitalio.DigitalInOut(board.BUTTON_D),
+    digitalio.DigitalInOut(board.BUTTON_E)
+]
+
+# Konfigurera lamporna på Button SHIM
+leds = [
+    digitalio.DigitalInOut(board.LED_A),
+    digitalio.DigitalInOut(board.LED_B),
+    digitalio.DigitalInOut(board.LED_C),
+    digitalio.DigitalInOut(board.LED_D),
+    digitalio.DigitalInOut(board.LED_E)
+]
+
+# Definiera knapparnas respektive färger
+button_colors = {
+    board.BUTTON_A: (255, 0, 0),   # Röd
+    board.BUTTON_B: (255, 255, 0), # Gul
+    board.BUTTON_C: (0, 255, 0),   # Grön
+    board.BUTTON_D: (0, 0, 255),   # Blå
+    board.BUTTON_E: (255, 255, 255) # Vit
+}
+
+# Definiera färgerna för funktionerna
+function_colors = {
+    "normal": (0, 0, 0),      # Avstängd
+    "amber": (255, 191, 0)    # Amber
+}
+
+# Definiera referensfärger för lamporna
+reference_colors = {
+    board.BUTTON_A: (255, 0, 0),   # Röd
+    board.BUTTON_B: (255, 255, 0), # Gul
+    board.BUTTON_C: (0, 255, 0),   # Grön
+    board.BUTTON_D: (0, 0, 255),   # Blå
+    board.BUTTON_E: (255, 255, 255) # Vit
+}
+
+# Aktivera pull-up motstånd för knapparna
+for button in buttons:
+    button.direction = digitalio.Direction.INPUT
+    button.pull = digitalio.Pull.UP
+
+# Aktivera lamporna
+for led in leds:
+    led.direction = digitalio.Direction.OUTPUT
+
+# Definiera strängar som ska skrivas när knapparna trycks ned
+button_strings = {
+    board.BUTTON_A: "String för knapp A",
+    board.BUTTON_B: "String för knapp B",
+    board.BUTTON_C: "String för knapp C",
+    board.BUTTON_D: "String för knapp D",
+    board.BUTTON_E: "String för knapp E"
+}
+
+# Funktion för att ändra färgen på en lampa
+def change_led_color(led, color):
+    led.value = True
+    time.sleep(0.05)  # Ge lite tid för att lampan ska uppfatta färgen
+    led.value = False
+
+# Lyssna efter knapptryckningar och hantera lampor
+while True:
+    for button, led in zip(buttons, leds):
+        # Kontrollera om knappen trycks ned
+        if not button.value:
+            # Ändra färgen på lamporna för alla knappar baserat på referensfärgen
+            for b, l in zip(buttons, leds):
+                change_led_color(l, reference_colors[b])
+            # Om knapp E hålls in, ändra funktionens färg till amber
+            if button == board.BUTTON_E:
+                function_color = function_colors["amber"]
+                change_led_color(led, function_color)
+            # Om en annan knapp trycks ned, ändra dess färg till amber i 1.5 sekunder
+            else:
+                change_led_color(led, function_colors["amber"])
+                time.sleep(1.5)
+                # Återgå till referensfärgen efter 1.5 sekunder
+                change_led_color(led, reference_colors[button])
+            # Skicka sträng baserat på knapptryckning
+            keyboard_layout.write(button_strings[button])
+            time.sleep(0.1)  # Ge lite tid innan nästa iteration
