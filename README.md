@@ -18,5 +18,10 @@ If you have the Rasphub PCO+PBS, you should use Typewriter code. Typewriter has 
 If you have the Rasphub PCO, you should use Scripter code. Scripter is very, very simple. You can store one (1) string on Scripter. When you plug it in, both the green and red LED will flash. They will flash for 7 seconds. During that time, you can prepare, and choose where you want to write. If you can press a key, and it shows up on the screen, then it works. When the 7 seconds have passed, the green light will be static and the red will be flashing very fast. It will aslo start writing out the string. It will write like the PCO+PBS, so at different speeds and it will make errors, which it will correct by itself.
 The Rasphub PCO is cheaper, but you can only store one string and it's not that configurable.
 
+# Purchase links
+
+I don't offer the links for the items, but i'll buy them for you.
+
+
 
 
