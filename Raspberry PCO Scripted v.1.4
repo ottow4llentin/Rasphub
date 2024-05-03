@@ -1,0 +1,70 @@
+import time
+import board
+import digitalio
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+# Stringar som ska skrivas när knapparna trycks
+button_strings = {
+    board.BUTTON_A: "String för knapp A",
+    board.BUTTON_B: "String för knapp B",
+    board.BUTTON_C: "String för knapp C",
+    board.BUTTON_D: "String för knapp D",
+}
+
+# Stringar som ska skrivas när knapp E hålls in och en annan knapp trycks
+function_button_strings = {
+    board.BUTTON_A: "Funktion för knapp A",
+    board.BUTTON_B: "Funktion för knapp B",
+    board.BUTTON_C: "Funktion för knapp C",
+    board.BUTTON_D: "Funktion för knapp D",
+}
+
+# Skapa en USB HID-tangentbord.
+keyboard = Keyboard(usb_hid.devices)
+
+# Skapa ett tangentbordslayout för att skicka strängar.
+keyboard_layout = KeyboardLayoutUS(keyboard)
+
+# Konfigurera knapparna på Button SHIM
+buttons = [
+    digitalio.DigitalInOut(board.BUTTON_A),
+    digitalio.DigitalInOut(board.BUTTON_B),
+    digitalio.DigitalInOut(board.BUTTON_C),
+    digitalio.DigitalInOut(board.BUTTON_D),
+    digitalio.DigitalInOut(board.BUTTON_E)
+]
+
+for button in buttons:
+    button.direction = digitalio.Direction.INPUT
+    button.pull = digitalio.Pull.UP
+
+# Flagga för att hålla koll på om knapp E är intryckt
+function_button_pressed = False
+
+# Håll knappen E intryckt för att aktivera funktionen
+def check_function_button():
+    global function_button_pressed
+    while True:
+        if not buttons[4].value:
+            function_button_pressed = True
+            break
+        else:
+            function_button_pressed = False
+            break
+
+# Lyssna efter knapptryckningar och skriv ut motsvarande strängar
+while True:
+    if function_button_pressed:
+        check_function_button()
+        for i in range(4):
+            if not buttons[i].value:
+                keyboard_layout.write(function_button_strings[buttons[i]])
+                time.sleep(0.1)
+    else:
+        for i in range(5):
+            if not buttons[i].value:
+                keyboard_layout.write(button_strings[buttons[i]])
+                time.sleep(0.1)
+            
