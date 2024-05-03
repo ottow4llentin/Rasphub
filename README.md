@@ -2,9 +2,9 @@
 
 Latest software for each:
 
-for Rasphub PCO+PBS : Rasphub PCO+PBS Typewriter v.1.3
+for Rasphub PCO+PBS : Typewriter v.1.3
 
-for Rasphub PCO : Rasphub PCO Scripter v.1.1
+for Rasphub PCO : Scripter v.1.1
 
 Not available for purchase;
 Will be available in: 6 days
