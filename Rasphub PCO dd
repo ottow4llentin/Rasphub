@@ -1,0 +1,48 @@
+import time
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+import board
+import digitalio
+import usb_hid
+import random
+
+# Ange din önskade sträng att skriva
+str_to_type = "Hello, world!"
+
+# Ange vilken GPIO-pinne som LED1 (röd) är ansluten till
+led1_pin = board.GP25
+# Ange vilken GPIO-pinne som LED2 (grön) är ansluten till
+led2_pin = board.GP15
+
+# Skapa digital IO-pinnar för att styra LED1 och LED2
+led1 = digitalio.DigitalInOut(led1_pin)
+led1.direction = digitalio.Direction.OUTPUT
+led2 = digitalio.DigitalInOut(led2_pin)
+led2.direction = digitalio.Direction.OUTPUT
+
+# Låt båda LED-lamporna blinka i en loop under de första 7 sekunderna
+start_time = time.monotonic()
+while time.monotonic() - start_time < 7:
+    led1.value = not led1.value  # Toggle LED1 (röd)
+    led2.value = not led2.value  # Toggle LED2 (grön)
+    time.sleep(0.4)  # Vänta 0.4 sekunder mellan varje blink
+
+# Slå på den gröna lampan
+led2.value = True
+
+# Skriv ut strängen med en slumpmässig fördröjning mellan 0.1 och 0.4 sekunder för varje bokstav
+for char in str_to_type:
+    led1.value = not led1.value  # Toggle LED1 (röd) för att få den att blinka
+    if random.random() < 0.1:  # 10% chans att göra fel
+        wrong_char = random.choice([c for c in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ åäöÅÄÖ,.-;:_̈́<> ' if c != char])
+        kbd.send(Keycode[wrong_char])  # Skicka ett slumpmässigt felaktigt tecken
+        time.sleep(0.2)  # Vänta lite innan vi backar upp
+        kbd.send(Keycode.BACKSPACE)  # Backa upp ett tecken
+        kbd.send(Keycode[char])  # Skriv rätt tecken
+    else:
+        kbd.send(Keycode[char])  # Skicka rätt tecken om det inte finns något fel
+    delay = random.uniform(0.1, 0.4)  # Slumpmässig fördröjning mellan 0.1 och 0.4 sekunder
+    time.sleep(delay)
+
+# Slå av den röda lampan och lämna den gröna på
+led1.value = False
