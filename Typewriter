@@ -1,0 +1,65 @@
+import time
+import board
+import digitalio
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+# Strängar som ska skrivas när knapparna trycks
+A = "Knapp A"
+A_GP9 = "Knapp A + GP9"
+A_GP10 = "Knapp A + GP10"
+A_GP910 = "Knapp A + GP9 + GP10"
+
+B = "Knapp B"
+B_GP9 = "Knapp B + GP9"
+B_GP10 = "Knapp B + GP10"
+B_GP910 = "Knapp B + GP9 + GP10"
+
+C = "Knapp C"
+C_GP9 = "Knapp C + GP9"
+C_GP10 = "Knapp C + GP10"
+C_GP910 = "Knapp C + GP9 +GP10"
+
+D = "Knapp D"
+D_GP9 = "Knapp D + GP9"
+D_GP10 = "Knapp D + GP10"
+D_GP910 = "Knapp D + GP9 + GP10"
+
+# Skapa en USB HID-tangentbord.
+keyboard = Keyboard(usb_hid.devices)
+
+# Skapa ett tangentbordslayout för att skicka strängar.
+keyboard_layout = KeyboardLayoutUS(keyboard)
+
+# Konfigurera knapparna på Mini Controller for Raspberry Pi Pico
+buttons = [
+    digitalio.DigitalInOut(board.GP18),
+    digitalio.DigitalInOut(board.GP19),
+    digitalio.DigitalInOut(board.GP20),
+    digitalio.DigitalInOut(board.GP22),
+    digitalio.DigitalInOut(board.GP9),  # Funktionsknapp 1
+    digitalio.DigitalInOut(board.GP10)  # Funktionsknapp 2
+]
+
+for button in buttons:
+    button.direction = digitalio.Direction.INPUT
+    button.pull = digitalio.Pull.UP
+
+# Flaggor för att hålla koll på funktionsknappar
+fn1_pressed = False
+fn2_pressed = False
+
+# Lyssna efter knapptryckningar och skriv ut motsvarande strängar
+while True:
+    # Kolla om Funktionsknapp 1 är intryckt
+    fn1_pressed = not buttons[4].value
+    # Kolla om Funktionsknapp 2 är intryckt
+    fn2_pressed = not buttons[5].value
+
+    for button in range(4):
+        if not buttons[button].value:
+            key = (buttons[button].name, fn1_pressed, fn2_pressed)
+            if key in locals():
+                keyboard_layout.write(locals()[key])
+                time.sleep(0.1)
